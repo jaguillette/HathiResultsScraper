@@ -1,54 +1,26 @@
 # -*- coding: utf-8 -*-
 # <nbformat>3.0</nbformat>
 
-# <codecell>
-
-from urllib import urlopen
+from math import ceil
 import requests
-from bs4 import BeautifulSoup
 import time
 import re
-URL = "http://www.cfa.harvard.edu/news/1994/press.html"
+URLparts = []
+URL = "http://catalog.hathitrust.org/Search/Home?checkspelling=true&lookfor=QB&type=callnoletters&use_dismax=1"
+Q = {'checkspelling':'true', 'lookfor':'QB', 'type':'callnoletters', 'use_dismax':1, 'page':1}
 
-# <codecell>
+def getURLparts():
+    URLpartsTemp=[]    #defines an empty temporary list to hold query results
+    urlGet0 = requests.get(URL, params=Q)
+    r = re.search('of \<span class=\"strong\"\>(.*?)\<', urlGet0.text)
+    pages = int(ceil(int(r.group(1))/20))+2
+    for n in range(1,pages):    #iterates over the results pages
+        Q['page']=n    #sets page in results equal to the iterative value
+        urlGet = requests.get(URL, params=Q)    #uses requests module to retrieve search results page
+        m = re.findall('\<a href=\"\/Record\/(.*?)\"\sclass=\"cataloglinkhref\"\>', urlGet.text)    
+        for i in range(len(m)):
+            URLparts.append(m[i])
 
-urlGet = requests.get(URL)
+getURLparts()
 
-# <codecell>
-
-print urlGet
-
-# <codecell>
-
-m = re.search('\<a href=\"\/Record\/(.*?)\"\sclass=\"cataloglinkhref\"\>', str(urlopened))
-m.group(1)
-
-# <codecell>
-
-scrapeTarget = BeautifulSoup(urlopened)
-
-# <rawcell>
-
-# r'\<a href=\"\/Record\/(.*?)\"\sclass=\"cataloglinkhref\"\>'
-
-# <codecell>
-
-body = scrapeTarget.body
-div1 = body.find(id='doc3')
-div2 = div1.find(id='contentContainer')
-div3 = div2.find(id='bd')
-div4 = div2.find(class_='yui-main content')
-div5 = div2.find(class_="yui-b first contentbox")
-div6 = div5.form.find(class_='result record1')
-div7 = div6.div.div.find(class_='resultitem')
-div8 = div7.find(class_='AccessLink')
-div8.li
-print div8
-
-# <codecell>
-
-body.contents
-
-# <codecell>
-
-
+print(URLparts)
